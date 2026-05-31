@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Library Management System</title>
+
+<style>
+body {
+    font-family: Arial;
+    background: #0f172a;
+    color: white;
+    margin: 0;
+    padding: 20px;
+}
+
+h1 {
+    text-align: center;
+}
+
+.container {
+    max-width: 900px;
+    margin: auto;
+}
+
+input, button {
+    padding: 10px;
+    margin: 5px;
+    border-radius: 6px;
+    border: none;
+}
+
+input {
+    width: 200px;
+}
+
+button {
+    background: #22c55e;
+    color: white;
+    cursor: pointer;
+}
+
+button:hover {
+    background: #16a34a;
+}
+
+.card {
+    background: #1e293b;
+    padding: 15px;
+    margin-top: 10px;
+    border-radius: 10px;
+}
+
+.book {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #334155;
+    margin-top: 10px;
+    padding: 10px;
+    border-radius: 8px;
+}
+
+.actions button {
+    margin-left: 5px;
+}
+
+.search {
+    margin-top: 20px;
+}
+</style>
+</head>
+
+<body>
+
+<h1>📚 Library Management System</h1>
+
+<div class="container">
+
+    <!-- Add Book -->
+    <div class="card">
+        <h3>Add Book</h3>
+        <input id="id" placeholder="Book ID">
+        <input id="title" placeholder="Title">
+        <input id="author" placeholder="Author">
+        <button onclick="addBook()">Add</button>
+    </div>
+
+    <!-- Search -->
+    <div class="card search">
+        <h3>Search</h3>
+        <input id="searchInput" placeholder="Search by ID or Title">
+        <button onclick="searchBook()">Search</button>
+        <button onclick="displayBooks()">Reset</button>
+    </div>
+
+    <!-- Book List -->
+    <div class="card">
+        <h3>Books</h3>
+        <div id="bookList"></div>
+    </div>
+
+</div>
+
+<script>
+let books = JSON.parse(localStorage.getItem("books")) || [];
+
+// Save to localStorage
+function saveData() {
+    localStorage.setItem("books", JSON.stringify(books));
+}
+
+// Add Book
+function addBook() {
+    let id = document.getElementById("id").value;
+    let title = document.getElementById("title").value;
+    let author = document.getElementById("author").value;
+
+    if (!id || !title || !author) {
+        alert("Fill all fields!");
+        return;
+    }
+
+    books.push({
+        id: id,
+        title: title,
+        author: author,
+        issued: false
+    });
+
+    saveData();
+    displayBooks();
+
+    document.getElementById("id").value = "";
+    document.getElementById("title").value = "";
+    document.getElementById("author").value = "";
+}
+
+// Display Books
+function displayBooks(list = books) {
+    let output = "";
+    
+    list.forEach((book, index) => {
+        output += `
+        <div class="book">
+            <div>
+                <b>${book.title}</b> by ${book.author}<br>
+                ID: ${book.id} | Status: ${book.issued ? "Issued" : "Available"}
+            </div>
+            <div class="actions">
+                <button onclick="toggleIssue(${index})">
+                    ${book.issued ? "Return" : "Issue"}
+                </button>
+                <button onclick="deleteBook(${index})">Delete</button>
+            </div>
+        </div>`;
+    });
+
+    document.getElementById("bookList").innerHTML = output;
+}
+
+// Issue / Return
+function toggleIssue(index) {
+    books[index].issued = !books[index].issued;
+    saveData();
+    displayBooks();
+}
+
+// Delete Book
+function deleteBook(index) {
+    books.splice(index, 1);
+    saveData();
+    displayBooks();
+}
+
+// Search
+function searchBook() {
+    let query = document.getElementById("searchInput").value.toLowerCase();
+
+    let filtered = books.filter(book =>
+        book.id.includes(query) ||
+        book.title.toLowerCase().includes(query)
+    );
+
+    displayBooks(filtered);
+}
+
+// Load on start
+displayBooks();
+</script>
+
+</body>
+</html>
